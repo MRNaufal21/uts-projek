@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Produk Kesehatan</title>
+  <style>
+    body { font-family: sans-serif; }
+    .produk { display: flex; flex-wrap: wrap; gap: 20px; }
+    .item { border: 1px solid #ccc; padding: 10px; width: 200px; }
+    .item img { width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <h1>Daftar Produk</h1>
+  <div class="produk">
+    <% produk.forEach(p => { %>
+      <div class="item">
+        <img src="<%= p.url.replace('https://produk-uts-startup.s3.amazonaws.com', 'https://d35u7qce4xrop5.cloudfront.net') %>" alt="<%= p.nama %>" />
+        <h3><%= p.nama %></h3>
+        <p>Harga: Rp<%= p.harga %></p>
+      </div>
+    <% }) %>
+  </div>
+</body>
+</html>
