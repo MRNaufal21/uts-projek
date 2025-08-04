@@ -1,38 +1,30 @@
-name: CI/CD Pipeline
+name: Deploy ke EC2
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  build-test-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout source code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
       with:
-        node-version: '18'
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Run unit tests
-      run: echo "No real tests yet, passing fake test"  # Ganti ini kalau punya real tests
-
-    - name: Deploy to EC2
-      if: success()
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd ~/webapp || git clone https://github.com/MRNaufal21/uts-projek.git ~/webapp && cd ~/webapp
+    - name: Deploy ke EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          cd ~/webapp || git clone https://github.com/MRNaufal21/uts-projek.git webapp
+          cd ~/webapp
           git pull origin main
-          docker stop webapp || true && docker rm webapp || true
+          docker stop webapp || true
+          docker rm webapp || true
           docker build -t uts-nodejs .
           docker run -d -p 3000:3000 --name webapp uts-nodejs
+        EOF
